@@ -48,7 +48,7 @@ T0=1e4;         %tumour limit (arbitrary)
 
 
 % calculate tumour, liver, blood
-[t,y] = ode23('TumourLiverDoseRates',t,[initialDose 0 0 0 0],[],kT,k_T,kL,kI,k_L,kO,k_O,k_I,L0,T0,O0,I0);
+[t,y] = ode23('TumourLiverDose',t,[initialDose 0 0 0 0],[],kT,k_T,kL,kI,k_L,kO,k_O,k_I,L0,T0,O0,I0);
 
 NP=y(:,1)./initialDose*100/2;               %blood concentration ID/g (2 = blood weight in grams)
 NP2 = NP*2;                                 %total in the blood

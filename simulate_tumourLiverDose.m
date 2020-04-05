@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This is MATLAB script to simulate rate of uptake of nanoparticles from 
+% This is MATLAB script to simulate rate of uptake of gold nanoparticles from 
 % the blood into the liver, tumour, and other organs and their total 
 % accumulations over 24 hours.
 % 
@@ -16,6 +16,7 @@
 % * 2. Output plot can be selected to be either uptake rate vs time or total uptake vs time.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%clear all variables and start fresh
 clear all; clc;
 tic
 
@@ -24,7 +25,7 @@ highDose = 5e3;
 lowDose = highDose/256;
 
 % USER INPUT SECTION
-initialDose = highDose;     %initialDose must equal either 'lowDose' or 'highDose'
+initialDose = lowDose;      %initialDose must equal either 'lowDose' or 'highDose'
 whichPlot = 2;              %for rates of uptake, set to 1. for total uptake, set to 2.
 % END USER INPUT SECTION
 
@@ -36,23 +37,24 @@ k_O=1e-18;      %out of "other" organs; negligible
 k_I=1e-18;      %out of Kupffer cells; negligible
 
 kL=4e-3;        %into liver KCs
-kT=0.53e-6;     %into tumour
-kO=8e-5;        %into "other" organs
-kI=2e-5;        %into liver other cells
+kT=5.5e-7;      %into tumour
+kO=1e-4;        %into "other" organs
+kI=12e-4;       %into liver other cells
 
 L0=1e2;         %liver limit (1 trillion)
 O0=1.8e3;       %other organ limit (arbitrary)
-I0=2.3e3;       %other cell limit (arbitrary)
-T0=L0+I0*5;     %tumour limit same as liver (arbitrary)
+I0=1.5e3;       %other cell limit (arbitrary)
+T0=1e4;         %tumour limit (arbitrary)
+
 
 % calculate tumour, liver, blood
-[t,y] = ode23('TumourLiverDose',t,[initialDose 0 0 0 0],[],kT,k_T,kL,kI,k_L,kO,k_O,k_I,L0,T0,O0,I0);
+[t,y] = ode23('TumourLiverDoseRates',t,[initialDose 0 0 0 0],[],kT,k_T,kL,kI,k_L,kO,k_O,k_I,L0,T0,O0,I0);
 
-NP=y(:,1)./initialDose*100/2;               %blood concentration ID/g (2 = blood weight)
+NP=y(:,1)./initialDose*100/2;               %blood concentration ID/g (2 = blood weight in grams)
 NP2 = NP*2;                                 %total in the blood
-NPL=(y(:,2)+y(:,5))./initialDose*100/1;     %liver concentration ID/g (1 = liver weight)
-NPT=y(:,3)./initialDose*100/0.3;            %tumour concentration ID/g (0.3 = tumour weight)
-NPO=y(:,4)./initialDose*100/18;             %other organ concentration ID/g (18 = "other organ" weight)
+NPL=(y(:,2)+y(:,5))./initialDose*100/1;     %liver concentration ID/g (1 = liver weight in grams)
+NPT=y(:,3)./initialDose*100/0.3;            %tumour concentration ID/g (0.3 = tumour weight in grams)
+NPO=y(:,4)./initialDose*100/18;             %other organ concentration ID/g (18 = "other organ" weight in grams)
 L=L0-y(:,2);
 T=T0-y(:,3);
 O=O0-y(:,4);
@@ -88,6 +90,7 @@ elseif whichPlot == 2 %plot the accumulation AMOUNTS
     p(2).LineWidth = 2;
     p(3).LineWidth = 2;
     p(4).LineWidth = 2;
+    ylim([0 80])
 end
 
 data = [t NP NPL NPT NPO];
